@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-2xl mx-auto mt-8" v-if="discussion">
     <h1 class="text-3xl font-bold mb-4">{{ discussion.title }}</h1>
-    <p class="text-gray-600 mb-4">Posted by {{ discussion.author }} on {{ formatDate(discussion.createdAt) }}</p>
+    <p class="text-gray-600 mb-4">Posted by {{ discussion.authorName }} on {{ formatDate(discussion.createdAt) }}</p>
     <div class="bg-white shadow-md rounded-lg p-6 mb-6">
       <p class="text-gray-800">{{ discussion.content }}</p>
     </div>

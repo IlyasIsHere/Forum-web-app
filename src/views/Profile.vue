@@ -37,64 +37,82 @@
 </template>
 
 <script>
-import { ref, onMounted, reactive } from 'vue';
 import { getAuth, updateProfile } from 'firebase/auth';
 import DiscussionList from '@/components/Discussions/DiscussionList.vue';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/firebase';
+import { getFirestore } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 export default {
   name: 'Profile',
   components: {
     DiscussionList
   },
-  setup() {
-    const currentUser = ref(null);
-    const userDiscussions = ref([]);
-    const profileForm = reactive({
-      displayName: '',
-      photoURL: ''
-    });
-
-    const fetchUserDiscussions = async () => {
-      if (currentUser.value) {
-        const q = query(collection(db, 'discussions'), where('author', '==', currentUser.value.displayName || 'Anonyme'));
-        const querySnapshot = await getDocs(q);
-        userDiscussions.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  data() {
+    return {
+      currentUser: null,
+      userDiscussions: [],
+      profileForm: {
+        displayName: '',
+        photoURL: ''
       }
     };
-
-    const updateProfile = async () => {
+  },
+  methods: {
+    async fetchUserDiscussions() {
+      if (this.currentUser) {
+        const q = query(collection(db, 'discussions'), where('authorId', '==', this.currentUser.uid));
+        const querySnapshot = await getDocs(q);
+        const functions = getFunctions();
+        const getUserData = httpsCallable(functions, 'getUserData');
+        
+        this.userDiscussions = await Promise.all(querySnapshot.docs.map(async doc => {
+          const data = doc.data();
+          try {
+            const result = await getUserData({ uid: data.authorId });
+            const authorData = result.data;
+            return { 
+              id: doc.id, 
+              ...data, 
+              author: authorData?.displayName || 'Anonyme'
+            };
+          } catch (error) {
+            console.error('Error fetching user data:', error);
+            return { 
+              id: doc.id, 
+              ...data, 
+              author: 'Anonyme'
+            };
+          }
+        }));
+      }
+    },
+    async updateProfile() {
       const auth = getAuth();
       try {
         await updateProfile(auth.currentUser, {
-          displayName: profileForm.displayName,
-          photoURL: profileForm.photoURL
+          displayName: this.profileForm.displayName,
+          photoURL: this.profileForm.photoURL
         });
-        currentUser.value = auth.currentUser;
+        this.currentUser = auth.currentUser;
         alert('Profil mis à jour avec succès');
+        // Refresh user discussions to reflect the updated display name
+        await this.fetchUserDiscussions();
       } catch (error) {
         console.error('Erreur lors de la mise à jour du profil:', error);
         alert('Erreur lors de la mise à jour du profil');
       }
-    };
-
-    onMounted(() => {
-      const auth = getAuth();
-      currentUser.value = auth.currentUser;
-      if (currentUser.value) {
-        profileForm.displayName = currentUser.value.displayName || '';
-        profileForm.photoURL = currentUser.value.photoURL || '';
-      }
-      fetchUserDiscussions();
-    });
-
-    return {
-      currentUser,
-      userDiscussions,
-      profileForm,
-      updateProfile
-    };
+    }
+  },
+  async mounted() {
+    const auth = getAuth();
+    this.currentUser = auth.currentUser;
+    if (this.currentUser) {
+      this.profileForm.displayName = this.currentUser.displayName || '';
+      this.profileForm.photoURL = this.currentUser.photoURL || '';
+      await this.fetchUserDiscussions();
+    }
   }
 };
 </script>

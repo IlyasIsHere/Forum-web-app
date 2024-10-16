@@ -36,7 +36,7 @@
 <script>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { db } from '../../firebase';
 
@@ -50,11 +50,15 @@ export default {
       try {
         const auth = getAuth();
         const user = auth.currentUser;
+        if (!user) {
+          throw new Error('User must be logged in to create a discussion');
+        }
         await addDoc(collection(db, 'discussions'), {
           title: title.value,
           content: content.value,
-          createdAt: new Date(),
-          author: user ? user.displayName : 'Anonymous',
+          createdAt: serverTimestamp(),
+          authorId: user.uid,
+          authorName: user.displayName || 'Anonyme',
         });
         router.push('/');
       } catch (error) {
