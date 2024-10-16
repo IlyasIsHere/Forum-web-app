@@ -1,6 +1,6 @@
 <template>
-  <div class="max-w-md mx-auto p-4">
-    <h2 class="text-2xl font-bold mb-4">Login</h2>
+  <div class="max-w-md mx-auto p-6 bg-white shadow-lg rounded-lg mt-12">
+    <h2 class="text-3xl font-bold mb-6 text-center text-blue-600">Login</h2>
     <form @submit.prevent="login">
       <div class="mb-4">
         <input type="email" v-model="email" class="input" placeholder="Email" required />
@@ -11,7 +11,9 @@
         <p v-if="!isPasswordValid" class="text-red-500 text-sm mt-1">Password must be at least 6 characters long.</p>
       </div>
       <p v-if="errorMessage" class="text-red-500 text-sm mb-4">{{ errorMessage }}</p>
-      <button type="submit" class="btn" :disabled="!isFormValid">Login</button>
+      <button type="submit" class="btn" :disabled="!isFormValid">
+        <i class="fas fa-sign-in-alt mr-2"></i> Login
+      </button>
     </form>
   </div>
 </template>
@@ -59,12 +61,9 @@ export default {
 
 <style scoped>
 .input {
-  @apply w-full p-2 border rounded;
+  @apply w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400;
 }
 .btn {
-  @apply bg-blue-500 text-white p-2 rounded w-full;
-}
-.btn:disabled {
-  @apply bg-gray-400 cursor-not-allowed;
+  @apply bg-blue-500 text-white p-3 rounded w-full mt-4 hover:bg-blue-600 transition;
 }
 </style>
