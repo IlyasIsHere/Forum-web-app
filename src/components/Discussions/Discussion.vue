@@ -1,13 +1,15 @@
 <template>
   <div class="max-w-2xl mx-auto mt-8" v-if="discussion">
-    <h1 class="text-3xl font-bold mb-4">{{ discussion.title }}</h1>
-    <p class="text-gray-600 mb-4">Posted by {{ discussion.authorName }} on {{ formatDate(discussion.createdAt) }}</p>
+    <h1 class="text-3xl text-blue-500 font-bold mb-4">#{{ discussion.title }}</h1>
+    <p class="text-gray-700 mb-4">Posted by 
+      <span class="text-red-600">{{ discussion.authorName }}</span> on
+      <span class="text-gray-600">{{ formatDate(discussion.createdAt) }}</span>
+    </p>
     <div class="bg-white shadow-md rounded-lg p-6 mb-6">
       <p class="text-gray-800">{{ discussion.content }}</p>
     </div>
     <ResponseList :discussionId="$route.params.id" ref="responseList" />
     <div class="mt-8">
-      <h2 class="text-2xl font-bold mb-4">Add a Response</h2>
       <NewResponseForm @response-added="onResponseAdded" />
     </div>
   </div>

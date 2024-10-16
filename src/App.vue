@@ -1,9 +1,10 @@
 <template>
-  <div id="app">
+  <div id="app" class="flex flex-col min-h-screen">
     <Navbar />
-    <main>
+    <main class="flex-grow">
       <router-view/>
     </main>
+    <Footer />
   </div>
 </template>
 
@@ -12,11 +13,13 @@ import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { auth } from './firebase';
 import Navbar from './components/Navbar.vue';
+import Footer from './components/Footer.vue';
 
 export default {
   name: 'App',
   components: {
-    Navbar
+    Navbar,
+    Footer
   },
   setup() {
     const router = useRouter();
@@ -44,5 +47,22 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+}
+
+/* Make the body take up the full height and prevent white gaps below footer */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+/* Flex container to stretch content and keep footer at the bottom */
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex-grow: 1;
 }
 </style>

@@ -1,6 +1,8 @@
 <template>
   <div class="max-w-md mx-auto p-6 bg-white shadow-lg rounded-lg mt-12">
-    <h2 class="text-3xl font-bold mb-6 text-center text-blue-600">Login</h2>
+    <h2 class="text-3xl font-bold mb-6 text-center text-blue-600">Login
+      <i class="fas fa-lock ml-2"></i>
+    </h2>
     <form @submit.prevent="login">
       <div class="mb-4">
         <input type="email" v-model="email" class="input" placeholder="Email" required />
