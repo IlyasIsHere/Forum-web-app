@@ -1,10 +1,41 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+  <div id="app">
+    <Navbar />
+    <main>
+      <router-view/>
+    </main>
+  </div>
 </template>
+
+<script>
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { auth } from './firebase';
+import Navbar from './components/Navbar.vue';
+
+export default {
+  name: 'App',
+  components: {
+    Navbar
+  },
+  setup() {
+    const router = useRouter();
+
+    onMounted(() => {
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          // User is signed in
+          console.log('User is signed in:', user.email);
+        } else {
+          // User is signed out
+          console.log('User is signed out');
+          router.push('/login');
+        }
+      });
+    });
+  }
+}
+</script>
 
 <style>
 #app {
@@ -13,18 +44,5 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-}
-
-nav {
-  padding: 30px;
-}
-
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-nav a.router-link-exact-active {
-  color: #42b983;
 }
 </style>
