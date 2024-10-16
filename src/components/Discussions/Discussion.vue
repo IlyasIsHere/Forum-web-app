@@ -5,9 +5,10 @@
     <div class="bg-white shadow-md rounded-lg p-6 mb-6">
       <p class="text-gray-800">{{ discussion.content }}</p>
     </div>
+    <ResponseList :discussionId="$route.params.id" ref="responseList" />
     <div class="mt-8">
-      <h2 class="text-2xl font-bold mb-4">Comments</h2>
-      <!-- Add comments component here when available -->
+      <h2 class="text-2xl font-bold mb-4">Add a Response</h2>
+      <NewResponseForm @response-added="onResponseAdded" />
     </div>
   </div>
   <div v-else class="max-w-2xl mx-auto mt-8">
@@ -18,8 +19,14 @@
 <script>
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+import NewResponseForm from './NewResponseForm.vue';
+import ResponseList from './ResponseList.vue';
 
 export default {
+  components: {
+    NewResponseForm,
+    ResponseList,
+  },
   data() {
     return {
       discussion: null,
@@ -40,6 +47,11 @@ export default {
       } else {
         console.log('No such document!');
         // Handle the case when the discussion doesn't exist
+      }
+    },
+    onResponseAdded(newResponse) {
+      if (this.$refs.responseList) {
+        this.$refs.responseList.addResponse(newResponse);
       }
     },
     formatDate(date) {
