@@ -70,7 +70,7 @@ export default {
   methods: {
     // Filter discussions by tag
     addTagToSearch(tag) {
-      this.searchQuery = `#${tag}`;
+      this.searchQuery = `${tag}`;
       this.applySearch();
     },
     // Apply full-text search and filter by tag if selected
