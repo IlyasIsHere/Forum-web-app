@@ -89,9 +89,9 @@
 
 <script>
 import { getAuth, updateProfile } from 'firebase/auth';
-import { ref as storageRef, getDownloadURL, uploadBytesResumable } from 'firebase/storage';
-import { storage } from '@/firebase'; // Import Firebase storage instance
-import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore'; // Include deleteDoc
+import { ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { storage } from '@/firebase';
+import { doc, setDoc, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 import { db } from '@/firebase';
 
 export default {
@@ -100,13 +100,13 @@ export default {
     return {
       currentUser: null,
       userDiscussions: [],
-      userResponses: [], // Add user responses
+      userResponses: [],
       profileForm: {
         displayName: '',
-        photoFile: null, // Store the selected file here
+        photoFile: null,
         photoURL: ''
       },
-      profileImage: '', // Store the profile image URL for display
+      profileImage: '',
       isUploading: false,
     };
   },
@@ -127,7 +127,6 @@ export default {
     },
     async updateProfile() {
       const auth = getAuth();
-      let photoURL = this.profileForm.photoURL;
       if (this.profileForm.photoFile) {
         const fileRef = storageRef(storage, `profilePictures/${auth.currentUser.uid}`);
         const uploadTask = uploadBytesResumable(fileRef, this.profileForm.photoFile);
@@ -140,16 +139,21 @@ export default {
             // Optional progress indication
           },
           (error) => {
-            console.error('Erreur lors du téléchargement de la photo:', error);
+            console.error('Error uploading the image:', error);
           },
           async () => {
-            photoURL = await getDownloadURL(uploadTask.snapshot.ref);
+            const photoURL = await getDownloadURL(uploadTask.snapshot.ref);
             this.isUploading = false;
+
+            // Save photo URL in both Firebase Auth and Firestore
             await this.updateUserProfile(photoURL);
+            await setDoc(doc(db, 'users', auth.currentUser.uid), {
+              profilePicture: photoURL,
+            }, { merge: true });
           }
         );
       } else {
-        await this.updateUserProfile(photoURL);
+        await this.updateUserProfile(this.profileForm.photoURL);
       }
     },
     async updateUserProfile(photoURL) {
@@ -160,12 +164,13 @@ export default {
           photoURL: photoURL
         });
         this.currentUser = auth.currentUser;
-        alert('Profil mis à jour avec succès');
+        this.profileImage = photoURL;
+        alert('Profile updated successfully');
         await this.fetchUserDiscussions();
         await this.fetchUserResponses();
       } catch (error) {
-        console.error('Erreur lors de la mise à jour du profil:', error);
-        alert('Erreur lors de la mise à jour du profil');
+        console.error('Error updating profile:', error);
+        alert('Error updating profile');
       }
     },
     onFileChange(event) {
@@ -179,8 +184,8 @@ export default {
         await deleteDoc(doc(db, 'discussions', discussionId));
         this.userDiscussions = this.userDiscussions.filter(discussion => discussion.id !== discussionId);
       } catch (error) {
-        console.error('Erreur lors de la suppression de la discussion:', error);
-        alert('Erreur lors de la suppression de la discussion');
+        console.error('Error deleting discussion:', error);
+        alert('Error deleting discussion');
       }
     },
     async deleteResponse(responseId) {
@@ -188,8 +193,8 @@ export default {
         await deleteDoc(doc(db, 'responses', responseId));
         this.userResponses = this.userResponses.filter(response => response.id !== responseId);
       } catch (error) {
-        console.error('Erreur lors de la suppression de la réponse:', error);
-        alert('Erreur lors de la suppression de la réponse');
+        console.error('Error deleting response:', error);
+        alert('Error deleting response');
       }
     },
     formatDate(timestamp) {
@@ -205,8 +210,9 @@ export default {
     if (this.currentUser) {
       this.profileForm.displayName = this.currentUser.displayName || '';
       this.profileForm.photoURL = this.currentUser.photoURL || '';
+      this.profileImage = this.currentUser.photoURL || '';
       await this.fetchUserDiscussions();
-      await this.fetchUserResponses(); 
+      await this.fetchUserResponses();
     }
   }
 };

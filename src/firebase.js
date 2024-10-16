@@ -3,15 +3,14 @@ import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage'; // Add Firebase Storage
 
-// Firebase configuration
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCW9iFIZ8o7a3ZAlQDwrVocaUKhetC6FaM",
-  authDomain: "forum-app-7fd8f.firebaseapp.com",
-  projectId: "forum-app-7fd8f",
-  storageBucket: "forum-app-7fd8f.appspot.com",
-  messagingSenderId: "513217287885",
-  appId: "1:513217287885:web:9046c611e559de2d8e3b84",
-  measurementId: "G-NC9M2FR2L7"
+  apiKey: "AIzaSyBUE9yQSKkeV-y1ArBuCPs52jV06A1DUsY",
+  authDomain: "um6p-vote.firebaseapp.com",
+  projectId: "um6p-vote",
+  storageBucket: "um6p-vote.appspot.com",
+  messagingSenderId: "36805119258",
+  appId: "1:36805119258:web:6c078d41933e9485f130a3"
 };
 
 const app = initializeApp(firebaseConfig);
